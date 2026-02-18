@@ -13,6 +13,7 @@ from .serializers import (
     RegisterSerializer,
     LoginSerializer
 )
+from django.views.decorators.csrf import csrf_exempt
 # --------------------------
 # Auth: Register
 # --------------------------
@@ -68,6 +69,7 @@ class PostViewSet(viewsets.ModelViewSet):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@csrf_exempt  # Disable CSRF for JWT/API usage
 def add_comment(request, id):
     try:
         post = Post.objects.get(id=id)
@@ -79,6 +81,7 @@ def add_comment(request, id):
         serializer.save(author=request.user, post=post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # --------------------------
 # Like Post
