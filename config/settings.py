@@ -19,10 +19,8 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 # --------------------------------------------------
 # ALLOWED HOSTS
 # --------------------------------------------------
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1,alx-social-media-feed-backend-api1.onrender.com"
-).replace(" ", "").split(",")
+ALLOWED_HOSTS = ["*"]
+
 # --------------------------------------------------
 # APPLICATIONS
 # --------------------------------------------------
