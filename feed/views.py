@@ -1,13 +1,10 @@
 # feed/views.py
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Post, Comment, Like
 from .serializers import (
     PostSerializer,
@@ -16,13 +13,12 @@ from .serializers import (
     RegisterSerializer,
     LoginSerializer
 )
-
+from django.views.decorators.csrf import csrf_exempt
 # --------------------------
 # Auth: Register
 # --------------------------
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@csrf_exempt
 def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
@@ -40,7 +36,6 @@ def register_view(request):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([AllowAny])
-@csrf_exempt
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
@@ -54,7 +49,7 @@ def login_view(request):
                 "user": RegisterSerializer(user).data,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
-            }, status=status.HTTP_200_OK)
+            })
         return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -74,28 +69,30 @@ class PostViewSet(viewsets.ModelViewSet):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
+@csrf_exempt  # Disable CSRF for JWT/API usage
 def add_comment(request, id):
-    # Safely get the post or return 404
-    post = get_object_or_404(Post, id=id)
+    try:
+        post = Post.objects.get(id=id)
+    except Post.DoesNotExist:
+        return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Create the comment with the logged-in user
     serializer = CommentSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(author=request.user, post=post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # Return serializer errors if invalid
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # --------------------------
 # Like Post
 # --------------------------
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@csrf_exempt
 def like_post(request, id):
-    post = get_object_or_404(Post, id=id)
+    try:
+        post = Post.objects.get(id=id)
+    except Post.DoesNotExist:
+        return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
 
     # Check if user already liked
     if Like.objects.filter(post=post, user=request.user).exists():
