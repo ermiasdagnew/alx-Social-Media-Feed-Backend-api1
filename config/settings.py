@@ -148,7 +148,7 @@ REST_FRAMEWORK = {
 # GRAPHQL
 # --------------------------------------------------
 GRAPHENE = {
-    "SCHEMA": "config.schema.schema",
+    "SCHEMA": "feed.schema.schema",
 }
 
 # --------------------------------------------------
