@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # --------------------------------------------------
 # BASE
@@ -16,10 +17,7 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-# --------------------------------------------------
-# ALLOWED HOSTS
-# --------------------------------------------------
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*"]  # for Render, you can also list your domain explicitly
 
 # --------------------------------------------------
 # APPLICATIONS
@@ -39,6 +37,12 @@ INSTALLED_APPS = [
     # Local apps
     'feed',
 ]
+
+# Optional: CORS (useful for Postman or frontend dev)
+# Uncomment if needed
+# INSTALLED_APPS += ['corsheaders']
+# MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # --------------------------------------------------
 # MIDDLEWARE
@@ -85,7 +89,7 @@ if os.environ.get("RENDER") == "true":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/tmp/db.sqlite3',  # writable location on Render
+            'NAME': '/tmp/db.sqlite3',
         }
     }
 else:
@@ -107,33 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # --------------------------------------------------
-# AUTHENTICATION
-# --------------------------------------------------
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-]
-
-# --------------------------------------------------
-# INTERNATIONALIZATION
-# --------------------------------------------------
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
-
-# --------------------------------------------------
-# STATIC FILES
-# --------------------------------------------------
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# --------------------------------------------------
-# DEFAULT PRIMARY KEY
-# --------------------------------------------------
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# --------------------------------------------------
-# DJANGO REST FRAMEWORK
+# REST FRAMEWORK
 # --------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -145,15 +123,27 @@ REST_FRAMEWORK = {
 }
 
 # --------------------------------------------------
-# GRAPHQL
+# SIMPLE JWT SETTINGS
 # --------------------------------------------------
-GRAPHENE = {
-    "SCHEMA": "feed.schema.schema",
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # dev: increase for testing
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
 # --------------------------------------------------
-# OPTIONAL: Add CORS if needed
+# GRAPHQL
 # --------------------------------------------------
-# INSTALLED_APPS += ['corsheaders']
-# MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
-# CORS_ALLOW_ALL_ORIGINS = True
+GRAPHENE = {
+    "SCHEMA": "feed.schema.schema",  # make sure this points to your feed app
+}
+
+# --------------------------------------------------
+# STATIC FILES
+# --------------------------------------------------
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# --------------------------------------------------
+# DEFAULT PRIMARY KEY
+# --------------------------------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
